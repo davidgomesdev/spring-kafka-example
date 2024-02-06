@@ -24,9 +24,6 @@ import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
 import org.springframework.kafka.support.serializer.JsonDeserializer
 import org.springframework.kafka.support.serializer.JsonSerializer
 
-private const val TYPE_MAPPINGS =
-    "born:me.davidgomes.learningcqrspoc.event.PersonBorn,aged:me.davidgomes.learningcqrspoc.event.PersonAged"
-
 @Configuration
 class KafkaConfig(
     @Value("\${${ProducerConfig.BOOTSTRAP_SERVERS_CONFIG}}")

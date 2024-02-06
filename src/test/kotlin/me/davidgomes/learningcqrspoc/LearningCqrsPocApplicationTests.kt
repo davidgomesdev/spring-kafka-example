@@ -3,12 +3,16 @@ package me.davidgomes.learningcqrspoc
 import com.fasterxml.jackson.databind.json.JsonMapper
 import com.fasterxml.jackson.module.kotlin.KotlinFeature
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import me.davidgomes.learningcqrspoc.dto.Person
 import me.davidgomes.learningcqrspoc.dto.request.NewPerson
 import me.davidgomes.learningcqrspoc.dto.response.PersonCreated
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.awaitility.kotlin.await
 import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -31,16 +35,7 @@ class LearningCqrsPocApplicationTests {
     companion object {
         private val kafka = KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:6.2.1"))
             .withReuse(true)
-        private val json = JsonMapper().registerModule(
-            KotlinModule.Builder()
-                .withReflectionCacheSize(512)
-                .configure(KotlinFeature.NullToEmptyCollection, false)
-                .configure(KotlinFeature.NullToEmptyMap, false)
-                .configure(KotlinFeature.NullIsSameAsDefault, false)
-                .configure(KotlinFeature.SingletonSupport, false)
-                .configure(KotlinFeature.StrictNullChecks, false)
-                .build()
-        )
+        private val json = jacksonObjectMapper()
 
         @JvmStatic
         @BeforeAll
@@ -74,12 +69,48 @@ class LearningCqrsPocApplicationTests {
                 .andReturn().response.contentAsString
         )
 
-        await.atMost(Duration.ofMillis(5500))
+        await.atMost(Duration.ofMillis(1000))
             .untilAsserted {
                 mockMvc.perform(
                     get("/persons/${createdResponse.citizenID}")
                 )
                     .andExpect(status().isOk)
+            }
+    }
+
+    @Test
+    fun `should age person, after 3 seconds`() {
+        val createdResponse = json.readValue<PersonCreated>(
+            mockMvc.perform(
+                post("/persons")
+                    .content(json.writeValueAsBytes(NewPerson("jammy")))
+                    .contentType(MediaType.APPLICATION_JSON_VALUE)
+            )
+                .andExpect(status().isAccepted)
+                .andReturn().response.contentAsString
+        )
+
+        await.atMost(Duration.ofMillis(1000))
+            .untilAsserted {
+                mockMvc.perform(
+                    get("/persons/${createdResponse.citizenID}")
+                )
+                    .andExpect(status().isOk)
+            }
+
+        Thread.sleep(2_000)
+
+        await
+            .atMost(Duration.ofMillis(1000))
+            .untilAsserted {
+                val person = json.readValue<Person>(
+                    mockMvc.perform(
+                        get("/persons/${createdResponse.citizenID}")
+                    )
+                        .andExpect(status().isOk)
+                        .andReturn().response.contentAsString)
+
+                assertNotEquals(0, person.age)
             }
     }
 }

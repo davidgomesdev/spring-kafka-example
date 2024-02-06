@@ -8,6 +8,7 @@ import me.davidgomes.learningcqrspoc.repository.PersonRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.core.KafkaTemplate
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -35,6 +36,12 @@ class PersonService(
         val entity = repository.findByCitizenID(citizenID) ?: return null
 
         return Person(entity.citizenID, entity.name, entity.age)
+    }
+
+    @Scheduled(fixedRate = 2_000)
+    fun agePeople() {
+        logger.info("Aging people (one year on earth is 2 seconds on a POC)")
+        repository.incrementPeopleAge()
     }
 
     private fun produceEvent(event: PersonEvent): UUID {

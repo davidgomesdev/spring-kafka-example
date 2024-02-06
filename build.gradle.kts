@@ -32,6 +32,7 @@ dependencies {
 	testImplementation("org.springframework.kafka:spring-kafka-test")
 	testImplementation("org.testcontainers:postgresql:1.19.4")
 	testImplementation("org.testcontainers:kafka:1.19.4")
+	testImplementation("org.awaitility:awaitility-kotlin:4.2.0")
 }
 
 tasks.withType<KotlinCompile> {

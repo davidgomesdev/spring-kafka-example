@@ -1,1 +1,5 @@
-spring.datasource.url: jdbc:tc:postgresql:11.1:///integration-tests-db
+spring:
+  datasource.url: jdbc:tc:postgresql:11.1:///integration-tests-db
+  jpa:
+    generate-ddl: true
+    hibernate.ddl-auto: create

@@ -32,23 +32,7 @@ import java.time.Duration
 @AutoConfigureMockMvc
 class LearningCqrsPocApplicationTests {
 
-    companion object {
-        private val kafka = KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:6.2.1"))
-            .withReuse(true)
-        private val json = jacksonObjectMapper()
-
-        @JvmStatic
-        @BeforeAll
-        fun setup() {
-            kafka.start()
-        }
-
-        @DynamicPropertySource
-        @JvmStatic
-        fun configureProperties(registry: DynamicPropertyRegistry) {
-            registry.add(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafka::getBootstrapServers)
-        }
-    }
+    private val json = jacksonObjectMapper()
 
     @Autowired
     lateinit var mockMvc: MockMvc
@@ -79,7 +63,7 @@ class LearningCqrsPocApplicationTests {
     }
 
     @Test
-    fun `should age person, after 3 seconds`() {
+    fun `should age person, after roughly 2 seconds`() {
         val createdResponse = json.readValue<PersonCreated>(
             mockMvc.perform(
                 post("/persons")
@@ -108,7 +92,8 @@ class LearningCqrsPocApplicationTests {
                         get("/persons/${createdResponse.citizenID}")
                     )
                         .andExpect(status().isOk)
-                        .andReturn().response.contentAsString)
+                        .andReturn().response.contentAsString
+                )
 
                 assertNotEquals(0, person.age)
             }

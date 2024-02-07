@@ -26,7 +26,7 @@ import org.springframework.kafka.support.serializer.JsonSerializer
 
 @Configuration
 class KafkaConfig(
-    @Value("\${${ProducerConfig.BOOTSTRAP_SERVERS_CONFIG}}")
+    @Value("\${spring.kafka.bootstrap-servers}")
     private val bootstrapAddress: String
 ) {
 
@@ -85,6 +85,7 @@ class KafkaConfig(
     @Bean
     fun personsTopic(): NewTopic {
         return TopicBuilder.name(PERSON_TOPIC)
+            .partitions(10)
             .build()
     }
 

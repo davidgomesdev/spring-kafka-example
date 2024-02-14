@@ -1,8 +1,8 @@
 package me.davidgomes.learningcqrspoc.controller
 
-import me.davidgomes.learningcqrspoc.dto.request.NewPerson
+import me.davidgomes.learningcqrspoc.dto.NewPerson
 import me.davidgomes.learningcqrspoc.dto.Person
-import me.davidgomes.learningcqrspoc.dto.response.PersonCreated
+import me.davidgomes.learningcqrspoc.dto.PersonCreated
 import me.davidgomes.learningcqrspoc.service.PersonService
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus

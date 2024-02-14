@@ -16,7 +16,7 @@ const val PERSON_TOPIC = "person-event"
 
 @Service
 class PersonService(
-    private val template: KafkaTemplate<ByteArray, PersonEventEnvelope>,
+    private val template: KafkaTemplate<ByteArray, Any>,
     private val repository: PersonRepository
 ) {
 
@@ -24,10 +24,9 @@ class PersonService(
 
     fun createPerson(name: String): UUID {
         val event = PersonBorn(name = name)
+        val eventID = produceEvent(event)
 
-        produceEvent(event)
-
-        logger.info("Person was born (event id = {})", event.citizenID)
+        logger.info("Person was born (event id = {})", eventID)
 
         return event.citizenID
     }
@@ -38,6 +37,7 @@ class PersonService(
         return Person(entity.citizenID, entity.name, entity.age)
     }
 
+    // TODO: fix, this should instead emit an event for aging people
     @Scheduled(fixedRate = 2_000)
     fun agePeople() {
         logger.info("Aging people (one year on earth is 2 seconds on a POC)")

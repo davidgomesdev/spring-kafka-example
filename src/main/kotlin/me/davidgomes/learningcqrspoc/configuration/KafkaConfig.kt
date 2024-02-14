@@ -1,7 +1,7 @@
 package me.davidgomes.learningcqrspoc.configuration
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import me.davidgomes.learningcqrspoc.event.PersonEventEnvelope
+import me.davidgomes.learningcqrspoc.service.ORDER_TOPIC
 import me.davidgomes.learningcqrspoc.service.PERSON_TOPIC
 import org.apache.kafka.clients.admin.AdminClientConfig
 import org.apache.kafka.clients.admin.NewTopic
@@ -31,7 +31,7 @@ class KafkaConfig(
 ) {
 
     @Bean
-    fun producerFactory(): ProducerFactory<ByteArray, PersonEventEnvelope> {
+    fun producerFactory(): ProducerFactory<ByteArray, Any> {
         return DefaultKafkaProducerFactory(
             mapOf(
                 ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to bootstrapAddress,
@@ -44,12 +44,12 @@ class KafkaConfig(
     }
 
     @Bean
-    fun kafkaTemplate(): KafkaTemplate<ByteArray, PersonEventEnvelope> {
+    fun kafkaTemplate(): KafkaTemplate<ByteArray, Any> {
         return KafkaTemplate(producerFactory())
     }
 
     @Bean
-    fun consumerFactory(): ConsumerFactory<ByteArray, PersonEventEnvelope> {
+    fun consumerFactory(): ConsumerFactory<ByteArray, Any> {
         return DefaultKafkaConsumerFactory(
             mapOf(
                 ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG to bootstrapAddress,
@@ -62,13 +62,13 @@ class KafkaConfig(
                 ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "latest"
             ),
             ByteArrayDeserializer(),
-            ErrorHandlingDeserializer(JsonDeserializer<PersonEventEnvelope>(jacksonObjectMapper()).trustedPackages("*"))
+            ErrorHandlingDeserializer(JsonDeserializer<Any>(jacksonObjectMapper()).trustedPackages("*"))
         )
     }
 
     @Bean
-    fun kafkaListenerContainerFactory(): ConcurrentKafkaListenerContainerFactory<ByteArray, PersonEventEnvelope> {
-        return ConcurrentKafkaListenerContainerFactory<ByteArray, PersonEventEnvelope>().also {
+    fun kafkaListenerContainerFactory(): ConcurrentKafkaListenerContainerFactory<ByteArray, Any> {
+        return ConcurrentKafkaListenerContainerFactory<ByteArray, Any>().also {
             it.consumerFactory = consumerFactory()
         }
     }
@@ -92,6 +92,19 @@ class KafkaConfig(
     @Bean
     fun personsDeadletterTopic(): NewTopic {
         return TopicBuilder.name("$PERSON_TOPIC-deadletter")
+            .build()
+    }
+
+    @Bean
+    fun ordersTopic(): NewTopic {
+        return TopicBuilder.name(ORDER_TOPIC)
+            .partitions(10)
+            .build()
+    }
+
+    @Bean
+    fun ordersDeadletterTopic(): NewTopic {
+        return TopicBuilder.name("$ORDER_TOPIC-deadletter")
             .build()
     }
 }

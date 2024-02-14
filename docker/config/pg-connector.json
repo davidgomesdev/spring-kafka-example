@@ -1,0 +1,14 @@
+{
+  "name": "event-sourcing-db-first-connector",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "tasks.max": "1",
+    "database.hostname": "postgres",
+    "database.port": "5432",
+    "database.user": "postgres",
+    "database.password": "secureness-always",
+    "database.dbname" : "postgres",
+    "topic.prefix": "order-event",
+    "table.include.list": "orders"
+  }
+}

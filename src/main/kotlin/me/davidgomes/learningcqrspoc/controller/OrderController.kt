@@ -30,7 +30,7 @@ class OrderController(private val service: OrderService) {
             PlaceOrderResult.BuyerNotFound -> ResponseEntity.badRequest()
                 .body(PlaceOrderResponse.BadRequestDetails("The buyer needs to be registered first."))
 
-            is PlaceOrderResult.Success -> ResponseEntity.ok(PlaceOrderResponse.OrderPlaced(result.orderID))
+            is PlaceOrderResult.Success -> ResponseEntity.accepted().body(PlaceOrderResponse.OrderPlaced(result.orderID))
         }
     }
 

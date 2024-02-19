@@ -23,14 +23,13 @@ interface OrderEvent {
 data class OrderPlaced(
     override val buyerCitizenID: UUID,
     val itemName: String,
-    val quantity: ULong,
+    val quantity: Int,
     override val orderID: UUID = UUID.randomUUID(),
-) :
-    OrderEvent
+) : OrderEvent
 
 data class OrderProcessed(
     override val orderID: UUID,
     override val buyerCitizenID: UUID,
     val itemName: String,
-    val quantity: ULong
+    val quantity: Int
 ) : OrderEvent

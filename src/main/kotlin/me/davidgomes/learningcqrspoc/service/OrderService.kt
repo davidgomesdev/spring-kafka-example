@@ -1,9 +1,8 @@
 package me.davidgomes.learningcqrspoc.service
 
 import me.davidgomes.learningcqrspoc.dto.Order
-import me.davidgomes.learningcqrspoc.event.OrderEvent
-import me.davidgomes.learningcqrspoc.event.OrderEventEnvelope
-import me.davidgomes.learningcqrspoc.event.OrderPlaced
+import me.davidgomes.learningcqrspoc.dto.OrderStatus
+import me.davidgomes.learningcqrspoc.entity.OrderEntity
 import me.davidgomes.learningcqrspoc.repository.OrderRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -22,30 +21,21 @@ class OrderService(
 
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
-    fun placeOrder(buyerCitizenID: UUID, itemName: String, quantity: ULong): PlaceOrderResult {
+    fun placeOrder(buyerCitizenID: UUID, itemName: String, quantity: Int): PlaceOrderResult {
         if (personService.getPerson(buyerCitizenID) == null) return PlaceOrderResult.BuyerNotFound
 
-        val event = OrderPlaced(buyerCitizenID, itemName, quantity)
+        val orderID = UUID.randomUUID()
+        repository.save(OrderEntity(orderID, buyerCitizenID, itemName, quantity, OrderStatus.Placed))
 
-        val eventID = produceEvent(event)
+        logger.info("Order was placed (by citizen = {})", buyerCitizenID)
 
-        logger.info("Order was placed (event id = {})", eventID)
-
-        return PlaceOrderResult.Success(event.orderID)
+        return PlaceOrderResult.Success(orderID)
     }
 
     fun getOrder(orderID: UUID): Order? {
         val entity = repository.findByOrderID(orderID) ?: return null
 
-        return Order(entity.orderID, entity.buyerCitizenID, entity.itemName, entity.quantity.toULong(), entity.status)
-    }
-
-    private fun produceEvent(event: OrderEvent): UUID {
-        val eventEnvelope = OrderEventEnvelope(event)
-
-        template.send(PERSON_TOPIC, event.buyerCitizenID.toString().encodeToByteArray(), eventEnvelope).get()
-
-        return eventEnvelope.eventId
+        return Order(entity.orderID, entity.buyerCitizenID, entity.itemName, entity.quantity, entity.status)
     }
 }
 

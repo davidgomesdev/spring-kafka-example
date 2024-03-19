@@ -1,6 +1,7 @@
 package me.davidgomes.learningcqrspoc.service
 
 import me.davidgomes.learningcqrspoc.dto.Person
+import me.davidgomes.learningcqrspoc.event.PeopleAged
 import me.davidgomes.learningcqrspoc.event.PersonBorn
 import me.davidgomes.learningcqrspoc.event.PersonEvent
 import me.davidgomes.learningcqrspoc.event.PersonEventEnvelope
@@ -24,9 +25,11 @@ class PersonService(
 
     fun createPerson(name: String): UUID {
         val event = PersonBorn(name = name)
-        val eventID = produceEvent(event)
+        val eventEnvelope = PersonEventEnvelope(event)
 
-        logger.info("Person was born (event id = {})", eventID)
+        template.send(PERSON_TOPIC, event.citizenID.toString().encodeToByteArray(), eventEnvelope).get()
+
+        logger.info("Person was born (event id = {})", eventEnvelope.eventId)
 
         return event.citizenID
     }
@@ -37,18 +40,13 @@ class PersonService(
         return Person(entity.citizenID, entity.name, entity.age)
     }
 
-    // TODO: fix, this should instead emit an event for aging people
     @Scheduled(fixedRate = 2_000)
     fun agePeople() {
         logger.info("Aging people (one year on earth is 2 seconds on a POC)")
-        repository.incrementPeopleAge()
-    }
 
-    private fun produceEvent(event: PersonEvent): UUID {
+        val event = PeopleAged
         val eventEnvelope = PersonEventEnvelope(event)
 
-        template.send(PERSON_TOPIC, event.citizenID.toString().encodeToByteArray(), eventEnvelope).get()
-
-        return eventEnvelope.eventId
+        template.send(PERSON_TOPIC, event.toString().encodeToByteArray(), eventEnvelope).get()
     }
 }

@@ -14,13 +14,12 @@ data class PersonEventEnvelope(val event: PersonEvent, val eventId: UUID = UUID.
 )
 @JsonSubTypes(
     JsonSubTypes.Type(PersonBorn::class, name = "born"),
-    JsonSubTypes.Type(PersonAged::class, name = "aged")
+    JsonSubTypes.Type(PeopleAged::class, name = "aged")
 )
 interface PersonEvent {
-    val citizenID: UUID
 }
 
-data class PersonBorn(override val citizenID: UUID = UUID.randomUUID(), val name: String) :
+data class PersonBorn(val citizenID: UUID = UUID.randomUUID(), val name: String) :
     PersonEvent
 
-data class PersonAged(override val citizenID: UUID) : PersonEvent
+object PeopleAged : PersonEvent

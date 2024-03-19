@@ -7,9 +7,10 @@
     "database.port": "5432",
     "database.user": "postgres",
     "database.password": "secureness-always",
-    "database.dbname" : "postgres",
+    "database.dbname" : "integration-tests-db",
     "topic.prefix": "order-event",
     "table.include.list": "orders",
+    "schema.include.list": "public",
     "plugin.name": "pgoutput"
   }
 }

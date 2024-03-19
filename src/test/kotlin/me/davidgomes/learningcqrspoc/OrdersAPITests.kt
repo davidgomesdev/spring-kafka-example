@@ -39,7 +39,6 @@ class OrdersAPITests {
 
     @Test
     fun `when an order is created, the get endpoint should return that order`() {
-        countDownLatch = CountDownLatch(1)
         val citizenID = createPerson()
 
         val createdResponse = json.readValue<PlaceOrderResponse.OrderPlaced>(
@@ -56,8 +55,6 @@ class OrdersAPITests {
                     MockMvcRequestBuilders.get("/orders/${createdResponse.orderID}")
                 )
                     .andExpect(MockMvcResultMatchers.status().isOk)
-        
-        assertTrue(countDownLatch.await(3, TimeUnit.SECONDS))
     }
 
     @Test

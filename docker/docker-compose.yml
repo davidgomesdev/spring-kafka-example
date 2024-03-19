@@ -17,6 +17,10 @@ services:
       - "postgres"
       - "-c"
       - "wal_level=logical"
+    healthcheck:
+      test: [ 'CMD', 'psql', '-U', 'postgres', '-c', 'SELECT 1' ]
+      interval: 10s
+      timeout: 5s
     volumes:
       - ./config/init.sql:/docker-entrypoint-initdb.d/init.sql
 
@@ -77,6 +81,21 @@ services:
       - CONFIG_STORAGE_TOPIC=debezium_configs
       - OFFSET_STORAGE_TOPIC=debezium_offsets
       - STATUS_STORAGE_TOPIC=debezium_statuses
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'curl',
+          '--silent',
+          '--fail',
+          '-X',
+          'GET',
+          'http://localhost:8083/connectors',
+        ]
+      start_period: 10s
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # Monitoring
 

@@ -24,7 +24,6 @@ class OrderController(private val service: OrderService) {
     private val log = LoggerFactory.getLogger(this::class.java)
 
     @PostMapping
-    @ResponseStatus(HttpStatus.ACCEPTED)
     fun createPerson(@RequestBody body: PlaceOrder): ResponseEntity<PlaceOrderResponse> {
         return when (val result = service.placeOrder(body.buyerCitizenID, body.itemName, body.quantity)) {
             PlaceOrderResult.BuyerNotFound -> ResponseEntity.badRequest()

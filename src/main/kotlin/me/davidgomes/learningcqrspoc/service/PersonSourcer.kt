@@ -22,7 +22,7 @@ class PersonSourcer(
     private val log = LoggerFactory.getLogger(this::class.java)
 
     @RetryableTopic(attempts = "2", kafkaTemplate = "kafkaTemplate")
-    @KafkaListener(topics = [PERSON_TOPIC])
+    @KafkaListener(topics = [PERSON_TOPIC], groupId = "learning-cqrs-example")
     fun consume(envelope: PersonEventEnvelope) {
         when (val event = envelope.event) {
             is PersonBorn -> {

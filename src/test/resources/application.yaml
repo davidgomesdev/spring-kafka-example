@@ -3,3 +3,18 @@ spring:
   jpa:
     generate-ddl: true
     hibernate.ddl-auto: create
+  kafka:
+    properties:
+      allow.auto.create.topics: false
+      spring.deserializer.key.delegate.class: org.apache.kafka.common.serialization.ByteArrayDeserializer
+      spring.deserializer.value.delegate.class: io.confluent.kafka.serializers.KafkaAvroDeserializer
+      specific.avro.reader: true
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.ByteArraySerializer
+      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+      interceptor.classes: io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor
+    consumer:
+      auto-offset-reset: earliest
+      key-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      interceptor.classes: io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor

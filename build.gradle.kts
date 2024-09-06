@@ -1,11 +1,16 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.net.URI
+
+val confluentVersion = "7.4.0"
 
 plugins {
-	id("org.springframework.boot") version "3.3.2"
-	id("io.spring.dependency-management") version "1.1.6"
 	kotlin("jvm") version "1.9.21"
 	kotlin("plugin.spring") version "1.9.21"
 	kotlin("plugin.jpa") version "1.9.21"
+	id("org.springframework.boot") version "3.3.2"
+	id("io.spring.dependency-management") version "1.1.6"
+	id("com.github.imflog.kafka-schema-registry-gradle-plugin") version "2.1.1"
+	id("com.github.davidmc24.gradle.plugin.avro") version "1.9.1"
 }
 
 group = "me.davidgomes"
@@ -15,8 +20,19 @@ java {
 	sourceCompatibility = JavaVersion.VERSION_17
 }
 
+buildscript {
+	repositories {
+		gradlePluginPortal()
+		maven("https://packages.confluent.io/maven/")
+		maven("https://jitpack.io")
+	}
+}
+
 repositories {
 	mavenCentral()
+	maven {
+		url = URI.create("https://packages.confluent.io/maven")
+	}
 }
 
 ext {
@@ -33,6 +49,10 @@ dependencies {
 	implementation("org.apache.kafka:kafka-streams")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.springframework.kafka:spring-kafka")
+	implementation("io.confluent:kafka-avro-serializer:$confluentVersion")
+	implementation("io.confluent:kafka-schema-registry-client:$confluentVersion")
+	implementation("io.confluent:kafka-streams-avro-serde:$confluentVersion")
+
 	runtimeOnly("org.postgresql:postgresql:$pgVersion")
 
 	testImplementation("org.springframework.boot:spring-boot-starter-test")

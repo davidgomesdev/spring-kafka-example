@@ -16,8 +16,7 @@ data class PersonEventEnvelope(val event: PersonEvent, val eventId: UUID = UUID.
     JsonSubTypes.Type(PersonBorn::class, name = "born"),
     JsonSubTypes.Type(PeopleAged::class, name = "aged")
 )
-interface PersonEvent {
-}
+interface PersonEvent
 
 data class PersonBorn(val citizenID: UUID = UUID.randomUUID(), val name: String) :
     PersonEvent

@@ -31,7 +31,6 @@ import java.util.concurrent.TimeUnit
 @AutoConfigureMockMvc
 class OrdersAPITests {
 
-    private var countDownLatch: CountDownLatch = CountDownLatch(1)
     private val json = jacksonObjectMapper()
 
     @Autowired
@@ -87,11 +86,5 @@ class OrdersAPITests {
             }
 
         return createdResponse.citizenID
-    }
-
-    @KafkaListener(topics = [ORDER_TOPIC])
-    fun testListener(@Payload record: String) {
-        println("yoooo $record")
-        countDownLatch.countDown()
     }
 }

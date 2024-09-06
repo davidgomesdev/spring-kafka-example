@@ -14,7 +14,7 @@ class PersonEntity(
     @Column(unique = true, updatable = false)
     val citizenID: UUID,
     val name: String,
-    val age: Int,
+    var age: Int,
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     val id: Int? = null,

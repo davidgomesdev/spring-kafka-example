@@ -3,4 +3,3 @@ spring:
   jpa:
     generate-ddl: true
     hibernate.ddl-auto: create
-  kafka.bootstrap-servers: 127.0.0.1:9092

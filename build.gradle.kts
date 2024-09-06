@@ -1,8 +1,8 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-	id("org.springframework.boot") version "3.2.1"
-	id("io.spring.dependency-management") version "1.1.4"
+	id("org.springframework.boot") version "3.3.2"
+	id("io.spring.dependency-management") version "1.1.6"
 	kotlin("jvm") version "1.9.21"
 	kotlin("plugin.spring") version "1.9.21"
 	kotlin("plugin.jpa") version "1.9.21"
@@ -19,6 +19,13 @@ repositories {
 	mavenCentral()
 }
 
+ext {
+	set("testcontainers.version", "1.20.1")
+}
+
+val pgVersion = "42.7.2"
+val awaitilityVersion = "4.2.0"
+
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.springframework.boot:spring-boot-starter-web")
@@ -26,13 +33,15 @@ dependencies {
 	implementation("org.apache.kafka:kafka-streams")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.springframework.kafka:spring-kafka")
-	runtimeOnly("org.postgresql:postgresql:42.7.1")
+	runtimeOnly("org.postgresql:postgresql:$pgVersion")
 
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.springframework.kafka:spring-kafka-test")
-	testImplementation("org.testcontainers:postgresql:1.19.4")
-	testImplementation("org.testcontainers:kafka:1.19.4")
-	testImplementation("org.awaitility:awaitility-kotlin:4.2.0")
+	testImplementation("org.testcontainers:testcontainers")
+	testImplementation("org.testcontainers:junit-jupiter")
+	testImplementation("org.testcontainers:postgresql")
+	testImplementation("org.testcontainers:kafka")
+	testImplementation("org.awaitility:awaitility-kotlin:$awaitilityVersion")
 }
 
 tasks.withType<KotlinCompile> {

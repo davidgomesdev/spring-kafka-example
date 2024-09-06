@@ -26,9 +26,10 @@ import org.springframework.kafka.support.serializer.JsonSerializer
 
 @Configuration
 class KafkaConfig(
-    @Value("\${spring.kafka.bootstrap-servers}")
-    private val bootstrapAddress: String
 ) {
+
+    @Value("\${spring.kafka.bootstrap-servers}")
+    private lateinit var bootstrapAddress: String
 
     @Bean
     fun producerFactory(): ProducerFactory<ByteArray, PersonEventEnvelope> {
@@ -59,7 +60,7 @@ class KafkaConfig(
                 ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS to JsonDeserializer::class.java,
                 "properties.${JsonDeserializer.TRUSTED_PACKAGES}" to "*",
                 ConsumerConfig.GROUP_ID_CONFIG to "learning-cqrs-poc",
-                ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "latest"
+                ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "earliest"
             ),
             ByteArrayDeserializer(),
             ErrorHandlingDeserializer(JsonDeserializer<PersonEventEnvelope>(jacksonObjectMapper()).trustedPackages("*"))

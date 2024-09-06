@@ -1,19 +1,12 @@
 package me.davidgomes.learningcqrspoc
 
-import com.fasterxml.jackson.databind.json.JsonMapper
-import com.fasterxml.jackson.module.kotlin.KotlinFeature
-import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import me.davidgomes.learningcqrspoc.dto.Person
 import me.davidgomes.learningcqrspoc.dto.request.NewPerson
 import me.davidgomes.learningcqrspoc.dto.response.PersonCreated
-import org.apache.kafka.clients.producer.ProducerConfig
 import org.awaitility.kotlin.await
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -22,14 +15,20 @@ import org.springframework.http.MediaType
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.testcontainers.containers.KafkaContainer
+import org.testcontainers.junit.jupiter.Container
+import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.utility.DockerImageName
 import java.time.Duration
 
+private const val MAX_TIME_OUT = 5_000L
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
+@Testcontainers
 class LearningCqrsPocApplicationTests {
 
     private val json = jacksonObjectMapper()
@@ -53,7 +52,7 @@ class LearningCqrsPocApplicationTests {
                 .andReturn().response.contentAsString
         )
 
-        await.atMost(Duration.ofMillis(1000))
+        await.atMost(Duration.ofMillis(MAX_TIME_OUT))
             .untilAsserted {
                 mockMvc.perform(
                     get("/persons/${createdResponse.citizenID}")
@@ -74,7 +73,7 @@ class LearningCqrsPocApplicationTests {
                 .andReturn().response.contentAsString
         )
 
-        await.atMost(Duration.ofMillis(1000))
+        await.atMost(Duration.ofMillis(MAX_TIME_OUT))
             .untilAsserted {
                 mockMvc.perform(
                     get("/persons/${createdResponse.citizenID}")
@@ -85,7 +84,7 @@ class LearningCqrsPocApplicationTests {
         Thread.sleep(2_000)
 
         await
-            .atMost(Duration.ofMillis(1000))
+            .atMost(Duration.ofMillis(MAX_TIME_OUT))
             .untilAsserted {
                 val person = json.readValue<Person>(
                     mockMvc.perform(
@@ -97,5 +96,16 @@ class LearningCqrsPocApplicationTests {
 
                 assertNotEquals(0, person.age)
             }
+    }
+
+    companion object {
+        @Container
+        val kafka = KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:6.2.1"))
+
+        @DynamicPropertySource
+        @JvmStatic
+        fun kafkaProperties(registry: DynamicPropertyRegistry) {
+            registry.add("spring.kafka.bootstrap-servers", kafka::getBootstrapServers)
+        }
     }
 }

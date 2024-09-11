@@ -1,0 +1,49 @@
+{
+  "namespace": "me.davidgomes.learningcqrspoc.event",
+  "name": "PersonEventEnvelope",
+  "type": "record",
+  "fields": [
+    {
+      "name": "eventId",
+      "type": {
+        "type": "string",
+        "logicalType": "uuid"
+      }
+    },
+    {
+      "name": "event",
+      "type": [
+        {
+          "name": "PersonBorn",
+          "type": "record",
+          "fields": [
+            {
+              "name": "citizenID",
+              "type": {
+                "type": "string",
+                "logicalType": "uuid"
+              }
+            },
+            {
+              "name": "name",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "name": "PersonAged",
+          "type": "record",
+          "fields": [
+            {
+              "name": "citizenID",
+              "type": {
+                "type": "string",
+                "logicalType": "uuid"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

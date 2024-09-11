@@ -2,6 +2,7 @@ package me.davidgomes.learningcqrspoc
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.confluent.kafka.serializers.KafkaAvroDeserializerConfig
 import me.davidgomes.learningcqrspoc.dto.Person
 import me.davidgomes.learningcqrspoc.dto.request.NewPerson
 import me.davidgomes.learningcqrspoc.dto.response.PersonCreated
@@ -18,7 +19,9 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.KafkaContainer
+import org.testcontainers.containers.Network
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.utility.DockerImageName
@@ -99,13 +102,37 @@ class LearningCqrsPocApplicationTests {
     }
 
     companion object {
+        private val network: Network = Network.newNetwork()
+
         @Container
-        val kafka = KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:6.2.1"))
+        val kafka: KafkaContainer = KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:6.2.1"))
+            .withNetwork(network)
+            .withNetworkAliases("kafka")
+
+        @Container
+        val schemaRegistry: GenericContainer<*> =
+            GenericContainer(DockerImageName.parse("confluentinc/cp-schema-registry:7.4.6"))
+                .withNetwork(network)
+                .withEnv("SCHEMA_REGISTRY_HOST_NAME", "schema-registry")
+                .withEnv("SCHEMA_REGISTRY_LISTENERS", "http://0.0.0.0:8081")
+                .withEnv("SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS", "kafka:9092")
+                .dependsOn(kafka)
+                .withExposedPorts(8081)
 
         @DynamicPropertySource
         @JvmStatic
         fun kafkaProperties(registry: DynamicPropertyRegistry) {
             registry.add("spring.kafka.bootstrap-servers", kafka::getBootstrapServers)
+            registry.add("spring.kafka.producer.properties.schema.registry.url") {
+                "http://${schemaRegistry.host}:${
+                    schemaRegistry.getMappedPort(8081)
+                }"
+            }
+            registry.add("spring.kafka.consumer.properties.schema.registry.url") {
+                "http://${schemaRegistry.host}:${
+                    schemaRegistry.getMappedPort(8081)
+                }"
+            }
         }
     }
 }

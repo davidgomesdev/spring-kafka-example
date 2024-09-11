@@ -1,0 +1,18 @@
+spring:
+  kafka:
+    properties:
+      schema.registry.url: http://localhost:8081
+      allow.auto.create.topics: false
+      spring.deserializer.key.delegate.class: org.apache.kafka.common.serialization.ByteArrayDeserializer
+      spring.deserializer.value.delegate.class: io.confluent.kafka.serializers.KafkaAvroDeserializer
+    producer:
+      bootstrap-servers: localhost:9092
+      key-serializer: org.apache.kafka.common.serialization.ByteArraySerializer
+      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+      interceptor.classes: io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor
+    consumer:
+      bootstrap-servers: localhost:9092
+      auto-offset-reset: earliest
+      key-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      interceptor.classes: io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor

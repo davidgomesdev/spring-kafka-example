@@ -1,8 +1,8 @@
 package me.davidgomes.learningcqrspoc.service
 
 import me.davidgomes.learningcqrspoc.dto.Person
+import me.davidgomes.learningcqrspoc.event.PersonAged
 import me.davidgomes.learningcqrspoc.event.PersonBorn
-import me.davidgomes.learningcqrspoc.event.PersonEvent
 import me.davidgomes.learningcqrspoc.event.PersonEventEnvelope
 import me.davidgomes.learningcqrspoc.repository.PersonRepository
 import org.slf4j.Logger
@@ -23,7 +23,7 @@ class PersonService(
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     fun createPerson(name: String): UUID {
-        val event = PersonBorn(name = name)
+        val event = PersonBorn(UUID.randomUUID(), name)
 
         produceEvent(event)
 
@@ -44,10 +44,15 @@ class PersonService(
         repository.incrementPeopleAge()
     }
 
-    private fun produceEvent(event: PersonEvent): UUID {
-        val eventEnvelope = PersonEventEnvelope(event)
+    private fun produceEvent(event: Any): UUID {
+        val citizenID = UUID.randomUUID()
+        val eventEnvelope = when (event) {
+            is PersonBorn -> PersonEventEnvelope(citizenID, event)
+            is PersonAged -> PersonEventEnvelope(citizenID, event)
+            else -> throw IllegalArgumentException("Only person events allowed")
+        }
 
-        template.send(PERSON_TOPIC, event.citizenID.toString().encodeToByteArray(), eventEnvelope).get()
+        template.send(PERSON_TOPIC, citizenID.toString().encodeToByteArray(), eventEnvelope).get()
 
         return eventEnvelope.eventId
     }

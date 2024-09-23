@@ -1,4 +1,8 @@
 spring:
+  datasource.url: jdbc:tc:postgresql:11.1:///integration-tests-db
+  jpa:
+    generate-ddl: true
+    hibernate.ddl-auto: create
   kafka:
     properties:
       schema.registry.url: http://localhost:8081

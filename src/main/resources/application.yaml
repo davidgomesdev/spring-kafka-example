@@ -9,6 +9,7 @@ spring:
       allow.auto.create.topics: false
       spring.deserializer.key.delegate.class: org.apache.kafka.common.serialization.ByteArrayDeserializer
       spring.deserializer.value.delegate.class: io.confluent.kafka.serializers.KafkaAvroDeserializer
+      specific.avro.reader: true
     producer:
       bootstrap-servers: localhost:9092
       key-serializer: org.apache.kafka.common.serialization.ByteArraySerializer

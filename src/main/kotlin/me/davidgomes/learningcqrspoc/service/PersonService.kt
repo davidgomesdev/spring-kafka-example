@@ -41,7 +41,20 @@ class PersonService(
     @Scheduled(fixedRate = 2_000)
     fun agePeople() {
         logger.info("Aging people (one year on earth is 2 seconds on a POC)")
-        repository.incrementPeopleAge()
+        repository.findAll()
+            .map { PersonAged(it.citizenID) }
+            .forEach {
+                val citizenID = it.citizenID
+
+                runCatching {
+                    template.send(
+                        PERSON_TOPIC,
+                        it.toString().encodeToByteArray(),
+                        PersonEventEnvelope(citizenID, it)
+                    )
+                        .get()
+                }.onFailure { ex -> logger.error("There was a failure sending aged person (citizenID '${it.citizenID}')", ex) }
+            }
     }
 
     private fun produceEvent(event: Any): UUID {

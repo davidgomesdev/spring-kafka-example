@@ -22,7 +22,7 @@ class PersonSourcer(
     private val log = LoggerFactory.getLogger(this::class.java)
 
     @RetryableTopic(attempts = "2", kafkaTemplate = "kafkaTemplate")
-    @KafkaListener(topics = [PERSON_TOPIC], groupId = "learning-cqrs-example")
+    @KafkaListener(topics = [PERSON_TOPIC], groupId = "learning-cqrs-example-\${random.int}")
     fun consume(envelope: PersonEventEnvelope) {
         when (val event = envelope.event) {
             is PersonBorn -> {
@@ -37,7 +37,7 @@ class PersonSourcer(
                     return
                 }
 
-                repository.save(person)
+                repository.save(person.apply { age++ })
 
                 log.info("Aged person ({})", event.citizenID)
             }

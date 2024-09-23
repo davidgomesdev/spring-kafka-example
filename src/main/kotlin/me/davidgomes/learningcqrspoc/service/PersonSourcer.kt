@@ -27,9 +27,8 @@ class PersonSourcer(
         when (val event = envelope.event) {
             is PersonBorn -> {
                 log.info("Creating new person ({})", event.citizenID)
-                repository.save(PersonEntity(event.citizenID, event.name, 0))
+                repository.save(PersonEntity(event.citizenID, event.name, event.initialAge))
             }
-
             is PersonAged -> {
                 val person = repository.findByCitizenID(event.citizenID)
 

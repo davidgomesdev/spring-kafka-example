@@ -22,8 +22,8 @@ class PersonService(
 
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
-    fun createPerson(name: String): UUID {
-        val event = PersonBorn(UUID.randomUUID(), name)
+    fun createPerson(name: String, initialAge: Int = 0): UUID {
+        val event = PersonBorn(UUID.randomUUID(), name, initialAge)
 
         produceEvent(event)
 

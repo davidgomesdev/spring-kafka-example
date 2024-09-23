@@ -26,7 +26,7 @@ class PersonController(private val service: PersonService) {
     @ResponseStatus(HttpStatus.ACCEPTED)
     fun createPerson(@RequestBody body: NewPerson): PersonCreated {
         val name = body.name
-        val uuid = service.createPerson(name)
+        val uuid = service.createPerson(name, body.initialAge)
 
         return PersonCreated(uuid, name)
     }

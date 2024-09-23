@@ -22,8 +22,8 @@ class PersonService(
 
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
-    fun createPerson(name: String): UUID {
-        val event = PersonBorn(UUID.randomUUID(), name)
+    fun createPerson(name: String, initialAge: Int = 0): UUID {
+        val event = PersonBorn(UUID.randomUUID(), name, initialAge)
 
         produceEvent(event)
 
@@ -41,7 +41,20 @@ class PersonService(
     @Scheduled(fixedRate = 2_000)
     fun agePeople() {
         logger.info("Aging people (one year on earth is 2 seconds on a POC)")
-        repository.incrementPeopleAge()
+        repository.findAll()
+            .map { PersonAged(it.citizenID) }
+            .forEach {
+                val citizenID = it.citizenID
+
+                runCatching {
+                    template.send(
+                        PERSON_TOPIC,
+                        it.toString().encodeToByteArray(),
+                        PersonEventEnvelope(citizenID, it)
+                    )
+                        .get()
+                }.onFailure { ex -> logger.error("There was a failure sending aged person (citizenID '${it.citizenID}')", ex) }
+            }
     }
 
     private fun produceEvent(event: Any): UUID {

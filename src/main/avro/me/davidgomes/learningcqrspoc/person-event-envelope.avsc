@@ -27,6 +27,11 @@
             {
               "name": "name",
               "type": "string"
+            },
+            {
+              "name": "initialAge",
+              "type": "int",
+              "default": 0
             }
           ]
         },
